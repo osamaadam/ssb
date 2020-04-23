@@ -1,8 +1,14 @@
-function detectedSignal = coherentDetector(modulatedSig, Fc, t)
+function detectedSignal = coherentDetector(modulatedSig, Fc, t, type)
   carrier = cos(2*pi*Fc*t);
   demodSignal = modulatedSig .* transpose(carrier);
-  
-  d = designfilt('lowpassfir', 'FilterOrder', 8000, 'CutoffFrequency', 4000, 'SampleRate', 5 * Fc);
-  detectedSignal = filter(d, demodSignal);
-  
+  switch(type)
+    case 'butterworth'
+      [b, a] = butter(3, Fc/(Fc * 5 / 2));
+      detectedSignal = filter(b, a, demodSignal);
+    case 'normal'
+      detectedSignal = lowPassFilter(demodSignal, 4e3, 5 * Fc);
+    otherwise
+      detectedSignal = 0;
+  end
+      
 end
